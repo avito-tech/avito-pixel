@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: ../
+      dockerfile: ./example/Dockerfile
+    env_file: ./.env.example
+    container_name: avito-pixel-server
+    ports:
+      - 3000:3000
+    depends_on:
+      - clickhouse
+    restart: always
+  clickhouse:
+    image: clickhouse/clickhouse-server
+    hostname: clickhouse
+    volumes:
+      - ../db/changelog/:/db/changelog/ 
+    container_name: clickhouse
+    ports:
+        - 9000:9000
