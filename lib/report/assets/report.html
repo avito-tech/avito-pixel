@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AvitoPixel отчет</title>
+</head>
+<style>
+    html, body, div, span, applet, object, iframe,
+    h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+    a, abbr, acronym, address, big, cite, code,
+    del, dfn, em, img, ins, kbd, q, s, samp,
+    small, strike, strong, sub, sup, tt, var,
+    b, u, i, center,
+    dl, dt, dd, ol, ul, li,
+    fieldset, form, label, legend,
+    table, caption, tbody, tfoot, thead, tr, th, td,
+    article, aside, canvas, details, embed, 
+    figure, figcaption, footer, header, hgroup, 
+    menu, nav, output, ruby, section, summary,
+    time, mark, audio, video {
+    	margin: 0;
+    	padding: 0;
+    	border: 0;
+    	font-size: 100%;
+    	font: inherit;
+    	vertical-align: baseline;
+    }
+    /* HTML5 display-role reset for older browsers */
+    article, aside, details, figcaption, figure, 
+    footer, header, hgroup, menu, nav, section {
+    	display: block;
+    }
+    body {
+    	line-height: 1;
+    }
+    ol, ul {
+    	list-style: none;
+    }
+    blockquote, q {
+    	quotes: none;
+    }
+    blockquote:before, blockquote:after,
+    q:before, q:after {
+    	content: '';
+    	content: none;
+    }
+    table {
+    	border-collapse: collapse;
+    	border-spacing: 0;
+    }
+
+
+    :root {
+        --height-header: 80px;
+        --width-container: 1316px;
+    }
+
+    body {
+        font-family: 'Manrope', Arial, Helvetica, sans-serif;
+    }
+    header {
+        position: sticky;
+        width: 100%;
+        top: 0;
+        height: var(--height-header);
+    }
+    .header__container {
+        width: 1316px;
+        margin: 0 auto;
+        padding: 24px 8px;
+    }
+    h1 {
+        font-size: 32px;
+        font-weight: 700;
+    }
+
+    h2 {
+        font-size: 26px;
+        line-height: 30px;
+        font-weight: 700;
+    }
+
+    h3 {
+        font-size: 21px;
+        line-height: 26px;
+        font-weight: 700;
+    }
+    
+
+    main {
+        display: block;
+        height: calc(100vh - var(--height-header));
+    }
+
+    .main__container {
+        max-width: var(--width-container);
+        margin: 0 auto;
+        padding: 10px 8px;
+    }
+
+    .period__main {
+        padding: 12px 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr) );
+        gap: 10px;
+    }
+
+    .month__main {
+        padding-top: 8px;
+    }
+
+    .table {
+	    width: 100%;
+	    margin-bottom: 20px;
+	    border: 1px solid #dddddd;
+	    border-collapse: collapse; 
+        font-size: 14px;
+    }
+
+    .table th {
+    	font-weight: bold;
+    	padding: 5px;
+    	background: #efefef;
+    	border: 1px solid #dddddd;
+    }
+
+    .table td {
+    	border: 1px solid #dddddd;
+    	padding: 1.6px;
+        text-align: center;
+    }
+</style>
+
+<script>
+    window['data'] = { report: JSON.parse({{ .PayloadString }}) };
+</script>
+
+<body>
+    <header>
+        <div class="header__container">
+            <h1>AvitoPixel отчет</h1>
+        </div>
+    </header>
+    <main>
+        <div class="main__container">
+            <div class="period">
+                <div class="period__header">
+                    <h2>Всего событий: <span id="hit-total"></span></h2>
+                </div>
+                <div class="period__main" id="period">
+                   
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer>
+
+    </footer>
+</body>
+
+<script>
+    function setInfo(id, value) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.innerText = value;
+        }
+    }
+    const report = window['data'].report;
+
+    setInfo("hit-total", report.total);
+
+    const period = document.getElementById('period');
+
+    function createMonthTable(rootMain, item) {
+        const table = document.createElement('table');
+        table.className = 'table';
+
+        const thead = document.createElement('thead');
+        table.appendChild(thead);
+
+        const numberTitle = document.createElement('th');
+        numberTitle.innerText = 'Число';
+        thead.appendChild(numberTitle);
+
+        const valueTitle = document.createElement('th');
+        valueTitle.innerText = 'Кол-во';
+        thead.appendChild(valueTitle);
+
+        const tbody = document.createElement('tbody');
+        table.appendChild(tbody);
+
+        item.days.forEach((el, index) => {
+            const row = document.createElement('tr');
+
+            tbody.appendChild(row);
+
+            const cellNumber = document.createElement('td');
+            cellNumber.innerText = el.date;
+            row.appendChild(cellNumber);
+
+            const cellValue = document.createElement('td');
+            cellValue.innerText = el.total;
+            row.appendChild(cellValue);
+        })
+
+        rootMain.appendChild(table);
+    }
+
+    function createMonthMain(rootMonth, item) {
+        const main = document.createElement('div');
+        main.className = 'month__main';
+
+        rootMonth.appendChild(main);
+
+        createMonthTable(main, item);
+    }
+
+    function createMonthTitle(rootHeaderMonth, item) {
+        const titleMonth = document.createElement('h3');
+        titleMonth.innerText = `${item.month} ${item.year}: ${item.total}`;
+        rootHeaderMonth.appendChild(titleMonth);
+    }
+
+    function createMonthHeader(rootMonth, item) {
+        const header = document.createElement('div');
+        header.className = "month__header";
+        rootMonth.appendChild(header);
+
+        createMonthTitle(header, item);
+    }
+
+    function createMonth(rootPeriod, item) {
+        const month = document.createElement('div');
+        month.className = "month";
+        rootPeriod.appendChild(month);
+
+        createMonthHeader(month, item);
+        createMonthMain(month, item);
+    }
+
+    report.months.forEach((item, index) => {
+        createMonth(period, item);
+    });
+</script>
+</html>

@@ -14,35 +14,6 @@ type errPayload struct {
 	Code    int    `json:"code"`
 }
 
-func JsonResponseOk(w http.ResponseWriter, metrics Metrics) error {
-	resp := jsonResponsePayload{
-		Data: metrics,
-	}
-	raw, err := json.Marshal(resp)
-	if err != nil {
-		return err
-	}
-	w.Header().Set("Content-Type", "application/json")
-	_, err = w.Write(raw)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func CsvResponseOk(w http.ResponseWriter, metrics Metrics) error {
-	raw, err := ToCsv(metrics)
-	if err != nil {
-		return err
-	}
-	w.Header().Set("Content-Type", "text/csv")
-	_, err = w.Write(raw)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func ResponseFail(w http.ResponseWriter, code int, message string) error {
 	resp := errPayload{
 		Code:    code,

@@ -48,8 +48,6 @@ func newClient(conf config.Clickhouse) (driver.Conn, error) {
 			"max_threads": conf.MaxThreads,
 		},
 	}
-	fmt.Println(conf.User)
-	fmt.Println(conf.Password)
 	db, err := clickhouse.Open(&opts)
 	return db, err
 }
