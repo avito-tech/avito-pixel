@@ -8,13 +8,6 @@ import (
 func (h *Handler) JsonBuild() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		// if r.Method != http.MethodPost {
-		// 	err := ResponseFail(w, 404, "Route not found")
-		// 	if err != nil {
-		// 		h.logger.Error(ctx, err)
-		// 	}
-		// 	return
-		// }
 		reportSettings, err := parseReportSettingsFromQueryParams(r)
 		if err != nil {
 			h.logger.Error(ctx, err)

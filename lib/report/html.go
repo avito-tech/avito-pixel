@@ -50,35 +50,7 @@ func (h *Handler) HtmlBuild() http.Handler {
 			return
 		}
 
-		payload := htmlPayload{}
-		var monthlyPayload *htmlPayloadMonth
-		for _, dailyReport := range metrics {
-			payload.Total += dailyReport.Value
-			if monthlyPayload == nil {
-				monthlyPayload = &htmlPayloadMonth{
-					Month: dailyReport.EventTime.Month().String(),
-					Year:  dailyReport.EventTime.Year(),
-				}
-			}
-
-			if dailyReport.EventTime.Month().String() != monthlyPayload.Month ||
-				dailyReport.EventTime.Year() != monthlyPayload.Year {
-				payload.Months = append(payload.Months, *monthlyPayload)
-				monthlyPayload = &htmlPayloadMonth{
-					Month: dailyReport.EventTime.Month().String(),
-					Year:  dailyReport.EventTime.Year(),
-				}
-			}
-			monthlyPayload.Total += dailyReport.Value
-			monthlyPayload.Days = append(monthlyPayload.Days, htmlPayloadDay{
-				Date:  dailyReport.EventTime.Day(),
-				Total: dailyReport.Value,
-			})
-		}
-
-		if monthlyPayload != nil {
-			payload.Months = append(payload.Months, *monthlyPayload)
-		}
+		payload := h.mapPayloadForHTML(metrics)
 
 		var payloadBytes []byte
 		payloadBytes, err = json.Marshal(payload)
@@ -110,4 +82,37 @@ func (h *Handler) HtmlBuild() http.Handler {
 			ResponseFail(w, 500, "Internal error")
 		}
 	})
+}
+
+func (h Handler) mapPayloadForHTML(metrics Metrics) htmlPayload {
+	payload := htmlPayload{}
+	var monthlyPayload *htmlPayloadMonth
+	for _, dailyReport := range metrics {
+		payload.Total += dailyReport.Value
+		if monthlyPayload == nil {
+			monthlyPayload = &htmlPayloadMonth{
+				Month: dailyReport.EventTime.Month().String(),
+				Year:  dailyReport.EventTime.Year(),
+			}
+		}
+
+		if dailyReport.EventTime.Month().String() != monthlyPayload.Month ||
+			dailyReport.EventTime.Year() != monthlyPayload.Year {
+			payload.Months = append(payload.Months, *monthlyPayload)
+			monthlyPayload = &htmlPayloadMonth{
+				Month: dailyReport.EventTime.Month().String(),
+				Year:  dailyReport.EventTime.Year(),
+			}
+		}
+		monthlyPayload.Total += dailyReport.Value
+		monthlyPayload.Days = append(monthlyPayload.Days, htmlPayloadDay{
+			Date:  dailyReport.EventTime.Day(),
+			Total: dailyReport.Value,
+		})
+	}
+
+	if monthlyPayload != nil {
+		payload.Months = append(payload.Months, *monthlyPayload)
+	}
+	return payload
 }
