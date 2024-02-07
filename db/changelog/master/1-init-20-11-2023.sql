@@ -22,8 +22,7 @@ CREATE TABLE IF NOT EXISTS analytics.visitors_1_day
     totalHits UInt64
 )
 ENGINE = SummingMergeTree
-ORDER BY (eventTime, sessionID)
-TTL eventTime + INTERVAL 7 DAY;
+ORDER BY (eventTime, sessionID);
 
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS analytics.visitors_1_day_mv
