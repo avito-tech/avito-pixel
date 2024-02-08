@@ -21,7 +21,7 @@ type Clickhouse struct {
 	MaxIdleConns int           `env:"CLICKHOUSE_MAX_IDLE_CONNS,required"`
 	ConnLifetime time.Duration `env:"CLICKHOUSE_CONN_LIFETIME,required"`
 	MaxThreads   int           `env:"CLICKHOUSE_MAX_THREADS,required"`
-	SkipVerify   bool          `env:"CLICKHOUSE_SKIP_VERIFY"`
+	SkipVerify   *bool         `env:"CLICKHOUSE_SKIP_VERIFY"`
 	CaCertFile   string        `env:"CA_CERT_FILE"`
 	Cert         string        `env:"CERT_FILE"`
 	CertKey      string        `env:"KEY_FILE"`

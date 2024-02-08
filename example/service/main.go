@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/avito-tech/avito-pixel/example/service/extras"
@@ -14,7 +13,6 @@ import (
 )
 
 func main() {
-	fmt.Println("1111")
 	logger := extras.NewLogger()
 	err := godotenv.Load()
 	if err != nil {
@@ -36,7 +34,6 @@ func main() {
 	mux.Handle("/hit/", hitHandler.Build())
 	mux.Handle("/report/csv/", reportHandler.CsvBuild())
 	mux.Handle("/report/json/", reportHandler.JsonBuild())
+	mux.Handle("/report/html/", reportHandler.HtmlBuild())
 	http.ListenAndServe(":3000", mux)
-
-	fmt.Println("azazax")
 }
