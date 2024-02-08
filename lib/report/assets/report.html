@@ -116,6 +116,7 @@
 	    border: 1px solid #dddddd;
 	    border-collapse: collapse; 
         font-size: 14px;
+        max-width: 250px;
     }
 
     .table th {
@@ -129,6 +130,29 @@
     	border: 1px solid #dddddd;
     	padding: 1.6px;
         text-align: center;
+    }
+
+    .period__date {
+        display: flex;
+        align-items: flex-end;
+        margin-bottom: 10px;
+    }
+
+    .date__picker {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .date__picker label {
+        margin-bottom: 4px;
+    }
+
+    .date__separator {
+        align-self: baseline;
+    }
+
+    .date__submit {
+        margin-left: 10px;
     }
 </style>
 
@@ -145,8 +169,21 @@
     <main>
         <div class="main__container">
             <div class="period">
+                <form action="" method="GET" class="period__date">
+                    <input hidden name="metric" value="visitors" />
+                        <div class="date__picker">
+                            <label for="from">Начало периода</label>
+                            <input type="date" id="from" name="from" min="2022-01-01" />
+                        </div>
+                        <div class="date__separator">&nbsp;-&nbsp;</div>
+                        <div class="date__picker">
+                            <label for="to">Конец периода</label>
+                            <input type="date" id="to" name="to" min="2022-01-01" />
+                        </div>
+                    <input class="date__submit" type="submit" /> 
+                </form>
                 <div class="period__header">
-                    <h2>Всего событий: <span id="hit-total"></span></h2>
+                    <h2><span id="total-label"></span> <span id="total-value"></span></h2>
                 </div>
                 <div class="period__main" id="period">
                    
@@ -154,93 +191,100 @@
             </div>
         </div>
     </main>
-    <footer>
-
-    </footer>
 </body>
 
 <script>
-    function setInfo(id, value) {
+    function setProperty(id, value, property = 'innerText') {
         const element = document.getElementById(id);
         if (element) {
-            element.innerText = value;
+            element[property] = value;
         }
     }
     const report = window['data'].report;
 
-    setInfo("hit-total", report.total);
+    const params = (new URL(document.location)).searchParams;
+    const from = params.get("from");
+    const to = params.get("to");
 
-    const period = document.getElementById('period');
+    setProperty("from", from, 'value');
+    setProperty("to", to, "value");
 
-    function createMonthTable(rootMain, item) {
-        const table = document.createElement('table');
-        table.className = 'table';
+    if (to && from) {
+        setProperty("total-label", "Всего событий:");
+        setProperty("total-value", report.total);
 
-        const thead = document.createElement('thead');
-        table.appendChild(thead);
+        const period = document.getElementById('period');
 
-        const numberTitle = document.createElement('th');
-        numberTitle.innerText = 'Число';
-        thead.appendChild(numberTitle);
+        function createMonthTable(rootMain, item) {
+            const table = document.createElement('table');
+            table.className = 'table';
 
-        const valueTitle = document.createElement('th');
-        valueTitle.innerText = 'Кол-во';
-        thead.appendChild(valueTitle);
+            const thead = document.createElement('thead');
+            table.appendChild(thead);
 
-        const tbody = document.createElement('tbody');
-        table.appendChild(tbody);
+            const numberTitle = document.createElement('th');
+            numberTitle.innerText = 'Число';
+            thead.appendChild(numberTitle);
 
-        item.days.forEach((el, index) => {
-            const row = document.createElement('tr');
+            const valueTitle = document.createElement('th');
+            valueTitle.innerText = 'Кол-во';
+            thead.appendChild(valueTitle);
 
-            tbody.appendChild(row);
+            const tbody = document.createElement('tbody');
+            table.appendChild(tbody);
 
-            const cellNumber = document.createElement('td');
-            cellNumber.innerText = el.date;
-            row.appendChild(cellNumber);
+            item.days.forEach((el, index) => {
+                const row = document.createElement('tr');
 
-            const cellValue = document.createElement('td');
-            cellValue.innerText = el.total;
-            row.appendChild(cellValue);
-        })
+                tbody.appendChild(row);
 
-        rootMain.appendChild(table);
+                const cellNumber = document.createElement('td');
+                cellNumber.innerText = el.date;
+                row.appendChild(cellNumber);
+
+                const cellValue = document.createElement('td');
+                cellValue.innerText = el.total;
+                row.appendChild(cellValue);
+            })
+
+            rootMain.appendChild(table);
+        }
+
+        function createMonthMain(rootMonth, item) {
+            const main = document.createElement('div');
+            main.className = 'month__main';
+
+            rootMonth.appendChild(main);
+
+            createMonthTable(main, item);
+        }
+
+        function createMonthTitle(rootHeaderMonth, item) {
+            const titleMonth = document.createElement('h3');
+            titleMonth.innerText = `${item.name} ${item.year}: ${item.total}`;
+            rootHeaderMonth.appendChild(titleMonth);
+        }
+
+        function createMonthHeader(rootMonth, item) {
+            const header = document.createElement('div');
+            header.className = "month__header";
+            rootMonth.appendChild(header);
+
+            createMonthTitle(header, item);
+        }
+
+        function createMonth(rootPeriod, item) {
+            const month = document.createElement('div');
+            month.className = "month";
+            rootPeriod.appendChild(month);
+
+            createMonthHeader(month, item);
+            createMonthMain(month, item);
+        }
+
+        report.months.forEach((item, index) => {
+            createMonth(period, item);
+        });
     }
-
-    function createMonthMain(rootMonth, item) {
-        const main = document.createElement('div');
-        main.className = 'month__main';
-
-        rootMonth.appendChild(main);
-
-        createMonthTable(main, item);
-    }
-
-    function createMonthTitle(rootHeaderMonth, item) {
-        const titleMonth = document.createElement('h3');
-        titleMonth.innerText = `${item.month} ${item.year}: ${item.total}`;
-        rootHeaderMonth.appendChild(titleMonth);
-    }
-
-    function createMonthHeader(rootMonth, item) {
-        const header = document.createElement('div');
-        header.className = "month__header";
-        rootMonth.appendChild(header);
-
-        createMonthTitle(header, item);
-    }
-
-    function createMonth(rootPeriod, item) {
-        const month = document.createElement('div');
-        month.className = "month";
-        rootPeriod.appendChild(month);
-
-        createMonthHeader(month, item);
-        createMonthMain(month, item);
-    }
-
-    report.months.forEach((item, index) => {
-        createMonth(period, item);
-    });
 </script>
 </html>
