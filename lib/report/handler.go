@@ -15,6 +15,7 @@ type ReportSettings struct {
 	Interval int64
 	From     string
 	To       string
+	Platform string
 }
 
 type Handler struct {
@@ -55,6 +56,7 @@ func parseReportSettingsFromQueryParams(r *http.Request) (ReportSettings, error)
 	if settings.To == "" {
 		return settings, errors.New("to is required")
 	}
+	settings.Platform = queryParams.Get("platform")
 
 	intervalParam := queryParams.Get("interval")
 	if intervalParam == "" {
