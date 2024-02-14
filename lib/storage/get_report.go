@@ -18,12 +18,13 @@ func (c *Clickhouse) GetReport(
 
 	template := "SELECT eventTime, count(*) as value FROM visitors_1_day_mv WHERE eventTime >= ? AND eventTime <= ? %s GROUP BY eventTime ORDER BY eventTime ASC"
 
+	arguments = append(arguments, payload.From, payload.To)
+
 	if payload.Platform != "" {
 		query = fmt.Sprintf(template, "AND platform = ?")
-		arguments = append(arguments, payload.From, payload.To, payload.Platform)
+		arguments = append(arguments, payload.Platform)
 	} else {
 		query = fmt.Sprintf(template, "")
-		arguments = append(arguments, payload.From, payload.To)
 	}
 
 	if err := c.DB.Select(ctx, &data, query, arguments...); err != nil {
