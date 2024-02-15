@@ -627,6 +627,10 @@
         return startOfWeekDate;
     }
 
+    function setActiveButton(element) {
+        element.classList.add('button-active');
+    }
+
     window['form'] = document.getElementById('form-panel');
     window['dateFromInput'] = document.getElementById('date-from');
     window['dateToInput'] = document.getElementById('date-to');
@@ -690,6 +694,7 @@
     }
 
     window['buttonFilterToday'].addEventListener('click', (event) => {
+        setActiveButton(window['buttonFilterToday']);
         const value = dateToString(new Date());
         window['dateFromInput'].value = value;
         window['dateToInput'].value = value;
@@ -698,6 +703,7 @@
 
 
     window['buttonFilterYesterday'].addEventListener('click', (event) => {
+        setActiveButton(window['buttonFilterYesterday']);
         const value = dateToString(new Date(Date.now()-ONE_DAY_MS));
         window['dateFromInput'].value = value;
         window['dateToInput'].value = value;
@@ -705,6 +711,7 @@
     });
 
     window['buttonFilterWeek'].addEventListener('click', (event) => {
+        setActiveButton(window['buttonFilterWeek']);
         const startDate = getStartOfWeekDate();
         const endDate = getEndOfWeekDate();
 
@@ -741,12 +748,12 @@
     const selectedDate2 = window['datepicker'].selectedDates[1];
     if (isEqualDate(selectedDate, selectedDate2)) {
         if (isEqualDate(new Date(),selectedDate))
-            window['buttonFilterToday'].classList.add('button-active');
+            setActiveButton(window['buttonFilterToday']);
         else if (isEqualDate(new Date(Date.now()-ONE_DAY_MS), selectedDate)) {
-            window['buttonFilterYesterday'].classList.add('button-active');
+            setActiveButton(window['buttonFilterYesterday']);
         }
     } else if (isEqualDate(selectedDate,getStartOfWeekDate()) && isEqualDate(selectedDate2,getEndOfWeekDate())) {
-        window['buttonFilterWeek'].classList.add('button-active');
+        setActiveButton(window['buttonFilterWeek']);
     }
 
 </script>
