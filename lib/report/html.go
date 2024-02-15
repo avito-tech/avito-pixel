@@ -11,8 +11,9 @@ import (
 var reportTemplate string
 
 type htmlPayloadDay struct {
-	Date  int    `json:"date"`
-	Total uint64 `json:"total"`
+	Date     int    `json:"date"`
+	Total    uint64 `json:"total"`
+	Platform string `json:"platform"`
 }
 
 type htmlPayloadMonth struct {
@@ -30,27 +31,32 @@ type htmlPayload struct {
 func (h *Handler) HtmlBuild() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		reportSettings, err := parseReportSettingsFromQueryParams(r)
-		if err != nil {
-			h.logger.Error(ctx, err)
-			err = ResponseFail(w, 400, "Bad request: could not parse request body")
+		queryParams := getReportSettingsFromQueryParams(r)
+
+		if queryParams.Metric == "" {
+			err := ResponseFail(w, 400, "Bad request: could not parse request body")
 			if err != nil {
 				h.logger.Error(ctx, err)
 			}
 			return
 		}
 
-		metrics, err := h.storage.GetReport(ctx, reportSettings)
-		if err != nil {
-			h.logger.Error(ctx, err)
-			err = ResponseFail(w, 500, "Internal server error: could not retrieve metrics")
+		reportSettings, err := validateQueryParams(queryParams)
+		var payload htmlPayload
+
+		if err == nil {
+			metrics, err := h.storage.GetReport(ctx, reportSettings)
 			if err != nil {
 				h.logger.Error(ctx, err)
+				err = ResponseFail(w, 500, "Internal server error: could not retrieve metrics")
+				if err != nil {
+					h.logger.Error(ctx, err)
+				}
+				return
 			}
-			return
-		}
 
-		payload := h.mapPayloadForHTML(metrics)
+			payload = h.mapPayloadForHTML(metrics)
+		}
 
 		var payloadBytes []byte
 		payloadBytes, err = json.Marshal(payload)
@@ -106,8 +112,9 @@ func (h Handler) mapPayloadForHTML(metrics Metrics) htmlPayload {
 		}
 		monthlyPayload.Total += dailyReport.Value
 		monthlyPayload.Days = append(monthlyPayload.Days, htmlPayloadDay{
-			Date:  dailyReport.EventTime.Day(),
-			Total: dailyReport.Value,
+			Date:     dailyReport.EventTime.Day(),
+			Total:    dailyReport.Value,
+			Platform: dailyReport.Platform,
 		})
 	}
 
