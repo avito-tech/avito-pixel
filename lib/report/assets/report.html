@@ -550,7 +550,7 @@
     function createBlockTitle(rootHeaderMonth, item) {
         const titleMonth = document.createElement('h3');
         titleMonth.classList.add('h25-style');
-        titleMonth.innerText = `${item.month} ${item.year}: ${item.total} ${declOfNum(item.total, LABEL_VISITORS)}`;
+        titleMonth.innerText = `${item.month} ${item.year}: ${numberWithSpaces(item.total)} ${declOfNum(item.total, LABEL_VISITORS)}`;
         rootHeaderMonth.appendChild(titleMonth);
     }
 
@@ -596,7 +596,7 @@
             row.appendChild(cellNumber);
 
             const cellValue = document.createElement('td');
-            cellValue.innerText = el.total;
+            cellValue.innerText = numberWithSpaces(el.total);
             row.appendChild(cellValue);
 
             const platformValue = document.createElement('td');
@@ -711,6 +711,10 @@
         window['form'].submit();
     }
 
+    function numberWithSpaces(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    }
+
     window['form'] = document.getElementById('form-panel');
     window['dateFromInput'] = document.getElementById('date-from');
     window['dateToInput'] = document.getElementById('date-to');
@@ -746,15 +750,15 @@
     setProperty("date-from", uriParams.from, 'value');
     setProperty("date-to", uriParams.to, "value");
 
-    const isEmptyData = !report.months || !(report.months || {}).length;
+    const isEmptyData = !(report.months || {}).length;
 
     if (isEmptyData) {
         setEmptyScreen();
     } else {
             setProperty("total-label", LABEL_TOTAL);
-            setProperty("total-value", report.total);
+            setProperty("total-value", numberWithSpaces(report.total));
 
-            (report.months || []).forEach((item, index) => {
+            (report.months || []).forEach((item) => {
                 createBlock(window['screen'], item);
             });
     }
