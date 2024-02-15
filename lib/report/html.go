@@ -44,6 +44,7 @@ func (h *Handler) HtmlBuild() http.Handler {
 
 		reportSettings, err := validateQueryParams(queryParams)
 		var payload htmlPayload
+		var platforms PlatformList
 
 		if err == nil {
 			metrics, err := h.storage.GetReport(ctx, reportSettings)
@@ -57,12 +58,27 @@ func (h *Handler) HtmlBuild() http.Handler {
 			}
 
 			payload = h.mapPayloadForHTML(metrics)
+
+			platforms, err = h.storage.GetPlatforms(ctx)
+			if err != nil {
+				platforms = nil
+			}
 		}
 
-		var payloadBytes []byte
+		var payloadBytes, platformsBytes []byte
 		payloadBytes, err = json.Marshal(payload)
 		if err != nil {
 			h.logger.Error(ctx, "Failed to marshal payload", err)
+			err = ResponseFail(w, 500, "Internal error")
+			if err != nil {
+				h.logger.Error(ctx, err)
+			}
+			return
+		}
+
+		platformsBytes, err = json.Marshal(platforms)
+		if err != nil {
+			h.logger.Error(ctx, "Failed to marshal platforms", err)
 			err = ResponseFail(w, 500, "Internal error")
 			if err != nil {
 				h.logger.Error(ctx, err)
@@ -82,7 +98,8 @@ func (h *Handler) HtmlBuild() http.Handler {
 
 		w.Header().Set("Content-Type", "text/html")
 		err = tmpl.Execute(w, map[string]string{
-			"PayloadString": string(payloadBytes),
+			"PayloadString":  string(payloadBytes),
+			"PlatformString": string(platformsBytes),
 		})
 		if err != nil {
 			h.logger.Error(ctx, err)

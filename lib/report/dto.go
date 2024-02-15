@@ -15,6 +15,12 @@ type MetricReport struct {
 
 type Metrics = []MetricReport
 
+type PlatformItem struct {
+	Item string `json:"name" ch:"platform"`
+}
+
+type PlatformList = []PlatformItem
+
 func ToCsv(metrics Metrics) ([]byte, error) {
 	var buf bytes.Buffer
 	writer := csv.NewWriter(&buf)

@@ -430,14 +430,13 @@
 </style>
 
 <script>
-    window['data'] = { report: JSON.parse({{ .PayloadString }}) };
-    // window['data'] = { report: {total: 0, months: null}}
+    window['data'] = { platforms: JSON.parse({{ .PlatformString }}), report: JSON.parse({{ .PayloadString }}) };
 </script>
 
 <body>
 <header>
     <div class="header__container">
-        <a href=".?metric=visitors" class="logo">
+        <a href="./html?metric=visitors" class="logo">
             <svg width="192" height="32" viewBox="0 0 192 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M41.505 0.621826L32.1301 25.1143H37.1679L39.1126 19.9977H49.0638L51.0001 25.1143H56.0006L46.663 0.621826H41.505ZM40.825 15.503L44.1006 6.8828L47.3638 15.503H40.825Z" fill="black"/>
                 <path d="M99.7152 7.59595C97.9522 7.59677 96.2291 8.1203 94.7636 9.10035C93.2981 10.0804 92.1562 11.473 91.4821 13.102C90.808 14.731 90.632 16.5233 90.9765 18.2523C91.3209 19.9813 92.1703 21.5693 93.4172 22.8156C94.6641 24.062 96.2525 24.9106 97.9817 25.2542C99.7108 25.5979 101.503 25.4211 103.132 24.7462C104.76 24.0714 106.152 22.9288 107.132 21.4629C108.111 19.9969 108.634 18.2735 108.634 16.5106C108.634 15.3395 108.403 14.18 107.955 13.0981C107.507 12.0163 106.85 11.0334 106.021 10.2055C105.193 9.37766 104.21 8.7211 103.128 8.27334C102.046 7.82559 100.886 7.5954 99.7152 7.59595ZM99.7152 20.8642C98.8578 20.861 98.0206 20.6039 97.3092 20.1254C96.5977 19.647 96.0439 18.9685 95.7175 18.1757C95.3911 17.3829 95.3067 16.5112 95.4751 15.6705C95.6435 14.8298 96.057 14.0578 96.6635 13.4519C97.2701 12.8459 98.0425 12.4331 98.8833 12.2656C99.7241 12.098 100.596 12.1831 101.388 12.5103C102.181 12.8375 102.859 13.3919 103.336 14.1039C103.814 14.8158 104.071 15.6532 104.073 16.5106C104.074 17.0824 103.962 17.6488 103.743 18.177C103.524 18.7053 103.203 19.1851 102.798 19.5886C102.393 19.9922 101.912 20.3116 101.383 20.5284C100.854 20.7452 100.287 20.8551 99.7152 20.8518V20.8642Z" fill="black"/>
@@ -604,10 +603,6 @@
             platformValue.innerText = el.platform || LABEL_TABLE_COLUMN_PLATFORM_EMPTY_VALUE;
             row.appendChild(platformValue);
 
-            if (el.platform && platformOptions.findIndex(item => item === el.platform) === -1) {
-                platformOptions.push(el.platform);
-            }
-
             if (index === item.days.length - 1) {
                 cellNumber.style.border = 'none';
                 cellValue.style.border = 'none';
@@ -630,6 +625,10 @@
 
     function getReportData() {
         return window['data'].report;
+    }
+
+    function getPlatforms() {
+        return (window['data'].platforms || []).filter(el => el.name !== "").map(el => el.name);
     }
 
     function setEmptyScreen() {
@@ -733,7 +732,7 @@
 </script>
 
 <script>
-    const platformOptions = [];
+    const platformOptions = getPlatforms();
     const report = getReportData();
     const uriParams = getUriParams();
 
@@ -752,27 +751,25 @@
     if (isEmptyData) {
         setEmptyScreen();
     } else {
-        if (uriParams.to && uriParams.from) {
             setProperty("total-label", LABEL_TOTAL);
             setProperty("total-value", report.total);
 
             (report.months || []).forEach((item, index) => {
                 createBlock(window['screen'], item);
             });
-
-            const platformSelect = document.getElementById('select-platform');
-            platformSelect.addEventListener('change', (event) => {
-                sendSubmit();
-            })
-            platformOptions.forEach((item)=>{
-                const option = document.createElement('option');
-                option.innerText = item;
-                option.value = item;
-                platformSelect.append(option);
-            })
-            setProperty("select-platform", uriParams.platform, "value")
-        }
     }
+
+    const platformSelect = document.getElementById('select-platform');
+    platformSelect.addEventListener('change', (event) => {
+        sendSubmit();
+    })
+    platformOptions.forEach((item)=>{
+        const option = document.createElement('option');
+        option.innerText = item;
+        option.value = item;
+        platformSelect.append(option);
+    })
+    setProperty("select-platform", uriParams.platform, "value")
 
     window['buttonFilterToday'].addEventListener('click', (event) => {
         setActiveButton(window['buttonFilterToday']);
