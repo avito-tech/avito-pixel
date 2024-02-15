@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"html/template"
 	"net/http"
+	"time"
 )
 
 //go:embed assets/report.html
 var reportTemplate string
 
 type htmlPayloadDay struct {
-	Date     int    `json:"date"`
+	Date     string `json:"date"`
 	Total    uint64 `json:"total"`
 	Platform string `json:"platform"`
 }
@@ -97,22 +98,22 @@ func (h Handler) mapPayloadForHTML(metrics Metrics) htmlPayload {
 		payload.Total += dailyReport.Value
 		if monthlyPayload == nil {
 			monthlyPayload = &htmlPayloadMonth{
-				Month: dailyReport.EventTime.Month().String(),
+				Month: getRussianMonth(dailyReport.EventTime.Month()),
 				Year:  dailyReport.EventTime.Year(),
 			}
 		}
 
-		if dailyReport.EventTime.Month().String() != monthlyPayload.Month ||
+		if getRussianMonth(dailyReport.EventTime.Month()) != monthlyPayload.Month ||
 			dailyReport.EventTime.Year() != monthlyPayload.Year {
 			payload.Months = append(payload.Months, *monthlyPayload)
 			monthlyPayload = &htmlPayloadMonth{
-				Month: dailyReport.EventTime.Month().String(),
+				Month: getRussianMonth(dailyReport.EventTime.Month()),
 				Year:  dailyReport.EventTime.Year(),
 			}
 		}
 		monthlyPayload.Total += dailyReport.Value
 		monthlyPayload.Days = append(monthlyPayload.Days, htmlPayloadDay{
-			Date:     dailyReport.EventTime.Day(),
+			Date:     dailyReport.EventTime.Format("02.01.2006"),
 			Total:    dailyReport.Value,
 			Platform: dailyReport.Platform,
 		})
@@ -122,4 +123,23 @@ func (h Handler) mapPayloadForHTML(metrics Metrics) htmlPayload {
 		payload.Months = append(payload.Months, *monthlyPayload)
 	}
 	return payload
+}
+
+func getRussianMonth(month time.Month) string {
+	months := map[time.Month]string{
+		time.January:   "Январь",
+		time.February:  "Февраль",
+		time.March:     "Март",
+		time.April:     "Апрель",
+		time.May:       "Май",
+		time.June:      "Июнь",
+		time.July:      "Июль",
+		time.August:    "Август",
+		time.September: "Сентябрь",
+		time.October:   "Октябрь",
+		time.November:  "Ноябрь",
+		time.December:  "Декабрь",
+	}
+
+	return months[month]
 }
