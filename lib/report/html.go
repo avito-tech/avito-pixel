@@ -11,8 +11,9 @@ import (
 var reportTemplate string
 
 type htmlPayloadDay struct {
-	Date  int    `json:"date"`
-	Total uint64 `json:"total"`
+	Date     int    `json:"date"`
+	Total    uint64 `json:"total"`
+	Platform string `json:"platform"`
 }
 
 type htmlPayloadMonth struct {
@@ -106,8 +107,9 @@ func (h Handler) mapPayloadForHTML(metrics Metrics) htmlPayload {
 		}
 		monthlyPayload.Total += dailyReport.Value
 		monthlyPayload.Days = append(monthlyPayload.Days, htmlPayloadDay{
-			Date:  dailyReport.EventTime.Day(),
-			Total: dailyReport.Value,
+			Date:     dailyReport.EventTime.Day(),
+			Total:    dailyReport.Value,
+			Platform: dailyReport.Platform,
 		})
 	}
 

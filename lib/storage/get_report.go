@@ -16,7 +16,7 @@ func (c *Clickhouse) GetReport(
 	var arguments []any
 	var query string
 
-	template := "SELECT eventTime, count(*) as value FROM visitors_1_day_mv WHERE eventTime >= ? AND eventTime <= ? %s GROUP BY eventTime ORDER BY eventTime ASC"
+	template := "SELECT eventTime, platform, count(*) as value FROM visitors_1_day_mv WHERE eventTime >= ? AND eventTime <= ? %s GROUP BY platform, eventTime ORDER BY eventTime ASC"
 
 	arguments = append(arguments, payload.From, payload.To)
 
