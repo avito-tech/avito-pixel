@@ -31,27 +31,32 @@ type htmlPayload struct {
 func (h *Handler) HtmlBuild() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		reportSettings, err := parseReportSettingsFromQueryParams(r)
-		if err != nil {
-			h.logger.Error(ctx, err)
-			err = ResponseFail(w, 400, "Bad request: could not parse request body")
+		queryParams := getReportSettingsFromQueryParams(r)
+
+		if queryParams.Metric == "" {
+			err := ResponseFail(w, 400, "Bad request: could not parse request body")
 			if err != nil {
 				h.logger.Error(ctx, err)
 			}
 			return
 		}
 
-		metrics, err := h.storage.GetReport(ctx, reportSettings)
-		if err != nil {
-			h.logger.Error(ctx, err)
-			err = ResponseFail(w, 500, "Internal server error: could not retrieve metrics")
+		reportSettings, err := validateQueryParams(queryParams)
+		var payload htmlPayload
+
+		if err == nil {
+			metrics, err := h.storage.GetReport(ctx, reportSettings)
 			if err != nil {
 				h.logger.Error(ctx, err)
+				err = ResponseFail(w, 500, "Internal server error: could not retrieve metrics")
+				if err != nil {
+					h.logger.Error(ctx, err)
+				}
+				return
 			}
-			return
-		}
 
-		payload := h.mapPayloadForHTML(metrics)
+			payload = h.mapPayloadForHTML(metrics)
+		}
 
 		var payloadBytes []byte
 		payloadBytes, err = json.Marshal(payload)

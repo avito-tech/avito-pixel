@@ -10,6 +10,14 @@ import (
 	"github.com/avito-tech/avito-pixel/lib/metrics"
 )
 
+type QueryParams struct {
+	Metric   string
+	Interval string
+	From     string
+	To       string
+	Platform string
+}
+
 type ReportSettings struct {
 	Metric   string
 	Interval int64
@@ -40,33 +48,55 @@ func NewHandler(
 	return h
 }
 
-func parseReportSettingsFromQueryParams(r *http.Request) (ReportSettings, error) {
-	var settings ReportSettings
+func getReportSettingsFromQueryParams(r *http.Request) QueryParams {
+	var settings QueryParams
 	queryParams := r.URL.Query()
 
 	settings.Metric = queryParams.Get("metric")
-	if settings.Metric == "" {
+	settings.From = queryParams.Get("from")
+	settings.To = queryParams.Get("to")
+	settings.Platform = queryParams.Get("platform")
+	settings.Interval = queryParams.Get("interval")
+
+	return settings
+}
+
+func validateQueryParams(q QueryParams) (ReportSettings, error) {
+	var settings ReportSettings
+
+	if q.Metric == "" {
 		return settings, errors.New("metric is required")
 	}
-	settings.From = queryParams.Get("from")
-	if settings.From == "" {
+	settings.Metric = q.Metric
+
+	if q.From == "" {
 		return settings, errors.New("from is required")
 	}
-	settings.To = queryParams.Get("to")
-	if settings.To == "" {
+	settings.From = q.From
+
+	if q.To == "" {
 		return settings, errors.New("to is required")
 	}
-	settings.Platform = queryParams.Get("platform")
+	settings.To = q.To
 
-	intervalParam := queryParams.Get("interval")
-	if intervalParam == "" {
+	if q.Interval == "" {
 		return settings, errors.New("interval is required")
 	}
-
-	interval, err := strconv.ParseInt(intervalParam, 10, 64)
+	var interval, err = strconv.ParseInt(q.Interval, 10, 64)
 	if err != nil {
 		return settings, err
 	}
 	settings.Interval = interval
+
+	return settings, nil
+}
+
+func parseReportSettingsFromQueryParams(r *http.Request) (ReportSettings, error) {
+	query := getReportSettingsFromQueryParams(r)
+	settings, err := validateQueryParams(query)
+	if err != nil {
+		return settings, err
+	}
+
 	return settings, nil
 }
