@@ -87,6 +87,7 @@ func validateQueryParams(q QueryParams) (ReportSettings, error) {
 		return settings, err
 	}
 	settings.Interval = interval
+	settings.Platform = q.Platform
 
 	return settings, nil
 }
