@@ -12,7 +12,7 @@ func (c *Clickhouse) GetPlatforms(
 	var data report.PlatformList
 	var query string
 
-	query = "SELECT platform FROM visitors_1_day_mv GROUP BY platform"
+	query = "SELECT platform FROM visitors_1_day_mv WHERE platform != 'web' GROUP BY platform"
 
 	if err := c.DB.Select(ctx, &data, query); err != nil {
 		return data, err
