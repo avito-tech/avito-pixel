@@ -64,9 +64,6 @@ func getReportSettingsFromQueryParams(r *http.Request) QueryParams {
 func validateQueryParams(q QueryParams) (ReportSettings, error) {
 	var settings ReportSettings
 
-	if q.Metric == "" {
-		return settings, errors.New("metric is required")
-	}
 	settings.Metric = q.Metric
 
 	if q.From == "" {
