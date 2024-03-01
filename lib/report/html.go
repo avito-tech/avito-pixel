@@ -34,14 +34,6 @@ func (h *Handler) HtmlBuild() http.Handler {
 		ctx := r.Context()
 		queryParams := getReportSettingsFromQueryParams(r)
 
-		if queryParams.Metric == "" {
-			err := ResponseFail(w, 400, "Bad request: could not parse request body")
-			if err != nil {
-				h.logger.Error(ctx, err)
-			}
-			return
-		}
-
 		reportSettings, err := validateQueryParams(queryParams)
 		var payload htmlPayload
 		var platforms PlatformList
