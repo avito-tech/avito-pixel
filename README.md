@@ -61,4 +61,4 @@ curl --location -X GET 'http://localhost:3000/report/json/?metric=visitors&from=
 или откройте страницу http://localhost:3000/report/html
 
 ### Установка счетчика на клиент
-**Для подключения скрипта на ваш сайт используйте инструкцию из [README.MD avito-pixel-web-client](https://github.com/avito-tech/avito-pixel-web-client)**
+Для подключения скрипта на ваш сайт используйте инструкцию из [README.MD avito-pixel-web-client](https://github.com/avito-tech/avito-pixel-web-client)
