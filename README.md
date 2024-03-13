@@ -12,7 +12,7 @@ Avito Pixel — это продукт для учёта количества п�
   - Аггрегатор результатов
 - База данных Clickhouse
 - Клиент для отправки событий на сервер
-  - JS
+  - [Web (Javascript)](https://github.com/avito-tech/avito-pixel-web-client)
 
 ## Инструкция по запуску
 
@@ -58,7 +58,6 @@ curl -X POST http://localhost:3000/hit/ \
 ```
 curl --location -X GET 'http://localhost:3000/report/json/?metric=visitors&from=2024-01-01&to=2024-01-31&interval=1'
 ```
-или откройте страницу http://localhost:3000/report/html/?metric=visitors&from=2023-12-02&to=2024-12-06&interval=1
+или откройте страницу http://localhost:3000/report/html
 
-Перед выполнением запроса измените поля `from` и `to` на актуальные.
-
+Для подключения скрипта на ваш сайт используйте инструкцию из [README.MD avito-pixel-web-client](https://github.com/avito-tech/avito-pixel-web-client)
